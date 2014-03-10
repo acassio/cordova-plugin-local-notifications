@@ -1,5 +1,5 @@
 /*
-    Copyright 2013-2014 appPlant UG
+    Copyright 2013 appPlant UG
 
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -58,11 +58,7 @@ public class Options {
 
         this.options = options;
 
-        if (repeat.equalsIgnoreCase("secondly")) {
-            interval = 1000;
-        } if (repeat.equalsIgnoreCase("minutely")) {
-            interval = AlarmManager.INTERVAL_FIFTEEN_MINUTES / 15;
-        } if (repeat.equalsIgnoreCase("hourly")) {
+        if (repeat.equalsIgnoreCase("hourly")) {
             interval = AlarmManager.INTERVAL_HOUR;
         } if (repeat.equalsIgnoreCase("daily")) {
             interval = AlarmManager.INTERVAL_DAY;
@@ -147,7 +143,7 @@ public class Options {
             }
         }
 
-        return null;
+        return RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     }
 
     /**
@@ -186,8 +182,22 @@ public class Options {
         if (resId == 0) {
             resId = getIcon();
         }
-
+        
         return options.optInt("smallIcon", resId);
+    }
+
+    /**
+     * Gibt den Pfad zur Callback-Funktion der Notification an.
+     */
+    public String getForeground () {
+        return options.optString("foreground", null);
+    }
+
+    /**
+     * Gibt den Pfad zur Callback-Funktion der Notification an.
+     */
+    public String getBackground () {
+        return options.optString("background", null);
     }
 
     /**
@@ -216,13 +226,6 @@ public class Options {
      */
     public Boolean getAutoCancel () {
         return options.optBoolean("autoCancel", false);
-    }
-
-    /**
-     *
-     */
-    public Boolean getOngoing () {
-        return options.optBoolean("ongoing", false);
     }
 
     /**

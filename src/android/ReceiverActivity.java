@@ -1,5 +1,5 @@
 /*
-    Copyright 2013-2014 appPlant UG
+    Copyright 2013 appPlant UG
 
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 public class ReceiverActivity extends Activity {
 
@@ -44,7 +45,7 @@ public class ReceiverActivity extends Activity {
             Options options = new Options(getApplicationContext()).parse(args);
 
             launchMainIntent();
-            fireClickEvent(options);
+            invokeBackgroundCallback(options);
         } catch (JSONException e) {}
     }
 
@@ -62,13 +63,23 @@ public class ReceiverActivity extends Activity {
     }
 
     /**
-     * Fires the onclick event.
+     * Ruft die `background` Callback Funktion auf.
      */
-    private void fireClickEvent (Options options) {
-        LocalNotification.fireEvent("click", options.getId(), options.getJSON());
+    private void invokeBackgroundCallback (Options options) {
+        String function = options.getBackground();
 
-        if (options.getAutoCancel()) {
-            LocalNotification.fireEvent("cancel", options.getId(), options.getJSON());
+        if (TextUtils.isEmpty(function))
+            return;
+
+        String params   = "\"" + options.getId() + "\",\\'" + JSONObject.quote(options.getJSON()) + "\\'.replace(/(^\"|\"$)/g, \\'\\')";
+        final String js = "setTimeout('" + function + "(" + params + ")',0)";
+
+        // after reboot, LocalNotification.webView is always null
+        // call background callback later
+        if (LocalNotification.webView == null) {
+            LocalNotification.callbackQueue.add(js);
+        } else {
+            LocalNotification.webView.sendJavascript(js);
         }
     }
 }
